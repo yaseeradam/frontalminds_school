@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import soundEffects from '../utils/soundEffects';
+import { VoiceManager } from '../utils/voiceManager';
 
 const SolarSystemGame = ({ onNavigate, onScore, onProgress, settings }) => {
   const planets = [
@@ -51,10 +52,7 @@ const SolarSystemGame = ({ onNavigate, onScore, onProgress, settings }) => {
 
   const speakPlanet = (planetName) => {
     if (!settings.voiceEnabled) return;
-    const utterance = new SpeechSynthesisUtterance(planetName);
-    utterance.rate = 0.9;
-    utterance.pitch = 1.2;
-    window.speechSynthesis.speak(utterance);
+    VoiceManager.speak(planetName);
   };
 
   return (

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { VoiceManager } from '../utils/voiceManager';
 
 const MainMenu = ({ onNavigate }) => {
   const [lastSpoken, setLastSpoken] = React.useState(null);
@@ -7,10 +8,7 @@ const MainMenu = ({ onNavigate }) => {
   const speakTitle = (title) => {
     if (lastSpoken === title) return;
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(title);
-    utterance.rate = 0.9;
-    utterance.pitch = 1.2;
-    window.speechSynthesis.speak(utterance);
+    VoiceManager.speak(title);
     setLastSpoken(title);
   };
 

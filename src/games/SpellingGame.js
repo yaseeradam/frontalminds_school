@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import soundEffects from '../utils/soundEffects';
+import { VoiceManager } from '../utils/voiceManager';
 
 const SpellingGame = ({ onNavigate, onScore, onProgress, settings }) => {
   const words = [
@@ -40,10 +41,7 @@ const SpellingGame = ({ onNavigate, onScore, onProgress, settings }) => {
 
   const speakWord = () => {
     if (!settings.voiceEnabled) return;
-    const utterance = new SpeechSynthesisUtterance(currentWord.word);
-    utterance.rate = 0.8;
-    utterance.pitch = 1.2;
-    window.speechSynthesis.speak(utterance);
+    VoiceManager.speak(currentWord.word);
   };
 
   const handleSubmit = () => {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import soundEffects from '../utils/soundEffects';
+import { VoiceManager } from '../utils/voiceManager';
 
 const MathGame = ({ onNavigate, onScore, onProgress, settings }) => {
   const [question, setQuestion] = useState({});
@@ -107,10 +108,7 @@ const MathGame = ({ onNavigate, onScore, onProgress, settings }) => {
   const speakQuestion = () => {
     if (!settings.voiceEnabled) return;
     const text = `${question.num1} ${question.operation === '×' ? 'times' : question.operation === '÷' ? 'divided by' : question.operation === '+' ? 'plus' : 'minus'} ${question.num2}`;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.9;
-    utterance.pitch = 1.2;
-    window.speechSynthesis.speak(utterance);
+    VoiceManager.speak(text);
   };
 
   return (
