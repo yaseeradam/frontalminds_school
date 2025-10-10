@@ -111,7 +111,18 @@ function App() {
     applyTheme(settings.theme);
   }, [settings]);
 
+  useEffect(() => {
+    // Apply theme when screen changes
+    applyTheme(settings.theme);
+  }, [currentScreen]);
+
   const applyTheme = (theme) => {
+    // Don't apply body background when on menu screen (MainMenu handles its own background)
+    if (currentScreen === 'menu') {
+      document.body.style.background = 'transparent';
+      return;
+    }
+    
     const themes = {
       default: ['#667eea', '#764ba2'],
       sunset: ['#ff6b6b', '#feca57'],
@@ -128,6 +139,14 @@ function App() {
     if (settings.soundEnabled) {
       soundEffects.playClick();
     }
+  };
+
+  const handleLogout = () => {
+    setCurrentProfile(null);
+    localStorage.removeItem('currentProfile');
+    localStorage.removeItem('selectedAvatar');
+    setSelectedAvatar('😊');
+    setCurrentScreen('menu');
   };
 
   const updateScore = (points) => {
@@ -279,47 +298,19 @@ function App() {
 
   return (
     <div className="app">
-      <motion.header 
-        className="header"
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <h1>🌟 Kids Learning Adventure 🌟</h1>
-        <div className="header-info">
-          <div style={{ marginRight: '10px' }}>
-            {selectedAvatar && selectedAvatar.startsWith('/avatars/') ? (
-              <img src={selectedAvatar} alt="avatar" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
-            ) : (
-              <div style={{ fontSize: '2rem' }}>{selectedAvatar}</div>
-            )}
-          </div>
-          <div style={{ marginRight: '20px' }}>
-            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#667eea' }}>⭐ Level {Math.floor(progress.totalScore / 500) + 1}</div>
-            <div style={{ background: '#e9ecef', borderRadius: '10px', height: '10px', width: '150px', overflow: 'hidden', marginTop: '5px' }}>
-              <div style={{ height: '100%', background: 'linear-gradient(90deg, #667eea, #764ba2)', width: `${((progress.totalScore % 500) / 500) * 100}%`, borderRadius: '10px', transition: 'width 0.5s' }} />
-            </div>
-          </div>
-          <p>Score: {score} points</p>
-          <div className="header-buttons">
-            <button onClick={() => navigateTo('challenges')} className="header-btn" title="Daily Challenges">🎯</button>
-            <button onClick={() => navigateTo('progress')} className="header-btn" title="Progress">📊</button>
-            <button onClick={() => navigateTo('inventory')} className="header-btn" title="Avatar Collection">🎒</button>
-            <button onClick={() => navigateTo('parent')} className="header-btn" title="Parent Dashboard">👨👩👧</button>
-            <button onClick={() => navigateTo('settings')} className="header-btn" title="Settings">⚙️</button>
-            <button onClick={() => {
-              if (window.confirm('Logout and return to profile selection?')) {
-                setCurrentProfile(null);
-                setCurrentScreen('menu');
-              }
-            }} className="header-btn" title="Logout" style={{ background: 'linear-gradient(135deg, #dc3545, #c82333)' }}>🚪</button>
-          </div>
-        </div>
-      </motion.header>
+
 
       <main className="main-content">
         {currentScreen === 'menu' && (
-          <MainMenu onNavigate={navigateTo} />
+          <MainMenu
+            onNavigate={navigateTo}
+            onLogout={handleLogout}
+            selectedAvatar={selectedAvatar}
+            progress={progress}
+            currentProfile={currentProfile}
+            score={score}
+            userName={currentProfile?.name || 'Student'}
+          />
         )}
         {currentScreen === 'visual-addition' && (
           <VisualAdditionGame
@@ -503,14 +494,14 @@ function App() {
         )}
         {currentScreen === 'parent' && (
           <ParentDashboard
-            onNavigate={navigateTo}
+ unde           onNavigate={navigateTo}
             progress={progress}
             settings={settings}
             onSettingsChange={handleSettingsChange}
           />
         )}
         {currentScreen === 'settings' && (
-          <Settings 
+           <Settings 
             onNavigate={navigateTo}
             settings={settings}
             onSettingsChange={handleSettingsChange}

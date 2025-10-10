@@ -94,9 +94,9 @@ const AvatarInventory = ({ onNavigate, currentAvatar, onSelectAvatar, userLevel 
           return (
             <motion.div
               key={avatar.id}
-              onClick={() => viewMode === 'select' ? handleAvatarSelect(avatar) : setViewingAvatar(avatar)}
-              whileHover={isUnlocked ? { scale: 1.05 } : {}}
-              whileTap={isUnlocked ? { scale: 0.95 } : {}}
+              onClick={() => setViewingAvatar(avatar)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               style={{
                 padding: '20px',
                 borderRadius: '20px',
@@ -104,7 +104,7 @@ const AvatarInventory = ({ onNavigate, currentAvatar, onSelectAvatar, userLevel 
                 background: (isSelected && viewMode === 'select') 
                   ? 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))' 
                   : 'white',
-                cursor: (viewMode === 'select' && isUnlocked) ? 'pointer' : viewMode === 'view' ? 'default' : 'not-allowed',
+                cursor: 'pointer',
                 position: 'relative',
                 opacity: isUnlocked ? 1 : 0.5,
                 boxShadow: (isSelected && viewMode === 'select') 
@@ -237,6 +237,7 @@ const AvatarInventory = ({ onNavigate, currentAvatar, onSelectAvatar, userLevel 
         onClose={() => setViewingAvatar(null)}
         avatar={viewingAvatar}
         userLevel={userLevel}
+        onSelect={handleAvatarSelect}
       />
     </motion.div>
   );

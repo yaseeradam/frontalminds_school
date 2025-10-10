@@ -2,8 +2,17 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { VoiceManager } from '../utils/voiceManager';
 
-const MainMenu = ({ onNavigate, userLevel = 4, totalScore, userName = 'Yaseer' }) => {
+const MainMenu = ({ onNavigate, onLogout, userLevel = 4, totalScore, userName = 'Yaseer', selectedAvatar, progress, currentProfile, score }) => {
   const [lastSpoken, setLastSpoken] = React.useState(null);
+  const [showDropdown, setShowDropdown] = React.useState(false);
+  const audioRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.3;
+      audioRef.current.play().catch(e => console.log('Audio autoplay blocked'));
+    }
+  }, []);
 
   const speakTitle = (title) => {
     if (lastSpoken === title) return;
@@ -13,39 +22,89 @@ const MainMenu = ({ onNavigate, userLevel = 4, totalScore, userName = 'Yaseer' }
   };
 
   const mainModules = [
-    { id: 'math', title: 'Math', icon: '➕➖✖️➗', color: '#FDB022', bgColor: 'linear-gradient(145deg, #FDB022, #F59E0B)' },
-    { id: 'science', title: 'Science', icon: '🧪', color: '#A78BFA', bgColor: 'linear-gradient(145deg, #A78BFA, #8B5CF6)' },
-    { id: 'reading', title: 'Reading', icon: '🔤', color: '#34D399', bgColor: 'linear-gradient(145deg, #34D399, #10B981)' },
+    { id: 'math', title: 'Math', icon: '➕➖✖️➗', bgColor: 'linear-gradient(145deg, #FDB022, #F59E0B)' },
+    { id: 'science', title: 'Science', icon: '🧪', bgColor: 'linear-gradient(145deg, #A78BFA, #8B5CF6)' },
+    { id: 'reading', title: 'Reading', icon: '🔤', bgColor: 'linear-gradient(145deg, #34D399, #10B981)' },
   ];
 
   const navigationButtons = [
-    { id: 'learn', title: 'Learn', icon: '📚', color: '#93C5FD', bgColor: 'rgba(147, 197, 253, 0.3)' },
-    { id: 'play', title: 'Play', icon: '🎮', color: '#93C5FD', bgColor: 'rgba(147, 197, 253, 0.3)' },
-    { id: 'progress', title: 'My Progress', icon: '📊', color: '#6EE7B7', bgColor: 'rgba(110, 231, 183, 0.3)' },
+    { id: 'learn', title: 'Learn', icon: '📚', bgColor: 'rgba(255, 255, 255, 0.5)' },
+    { id: 'play', title: 'Play', icon: '🎮', bgColor: 'rgba(255, 255, 255, 0.5)' },
+    { id: 'progress', title: 'My Progress', icon: '📊', bgColor: 'rgba(255, 255, 255, 0.5)' },
   ];
 
   return (
     <div className="frontal-dashboard">
-      <div className="main-container">
-        {/* Header Section */}
-        <div className="header-section">
-          <div className="branding">
-            <h1>FrontalMinds</h1>
-            <p>Think Smart. Learn Fun!</p>
-          </div>
-
-          <div className="user-profile">
-            <img src="/avatars/Gemini_Generated_Image_f9aieuf9aieuf9ai.png" alt="User Avatar" className="avatar-img" />
-            <div className="level-info">
-              <span className="level-text">Level {userLevel} Learner</span>
-              <div className="progress-bar">
-                <div className="progress-fill" style={{ width: '75%' }}></div>
-                <div className="progress-icon">🔥</div>
-              </div>
-            </div>
-          </div>
+      <video className="background-video" autoPlay muted loop>
+        <source src="/video/dashboard-bg-video.mp4" type="video/mp4" />
+        <source src="/video/dashboard-bg-video.webm" type="video/webm" />
+      </video>
+      <audio ref={audioRef} loop>
+        <source src="/audio/dashboard-bg-music.mp3" type="audio/mpeg" />
+        <source src="/audio/dashboard-bg-music.ogg" type="audio/ogg" />
+      </audio>
+      {/* Header with Branding and User Profile */}
+      <div className="top-header">
+        <div className="branding">
+          <h1 className="brand-name">FrontalMinds</h1>
+          <p className="brand-tagline">Think Smart. Learn Fun!</p>
         </div>
 
+        {/* Navigation Bar integrated into header */}
+        <div className="header-navbar">
+          <motion.button
+            onClick={() => onNavigate('challenges')}
+            className="header-navbar-btn"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <span className="navbar-icon">🎯</span>
+            <span className="navbar-label">Challenges</span>
+          </motion.button>
+
+          <motion.button
+            onClick={() => onNavigate('inventory')}
+            className="header-navbar-btn"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <span className="navbar-icon">🎒</span>
+            <span className="navbar-label">Collection</span>
+          </motion.button>
+        </div>
+
+        <div className="user-profile-header" onClick={() => setShowDropdown(!showDropdown)}>
+          {selectedAvatar && selectedAvatar.startsWith('/avatars/') ? (
+            <img src={selectedAvatar} alt="User Avatar" className="avatar-img-header" />
+          ) : (
+            <div className="avatar-img-header" style={{ fontSize: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{selectedAvatar}</div>
+          )}
+          <div className="level-info-header">
+            <span className="level-text-header">Level {Math.floor(progress?.totalScore / 500) + 1} Learner</span>
+            <div className="progress-bar-header">
+              <div
+                className="progress-fill-header"
+                style={{ width: `${((progress?.totalScore % 500) / 500) * 100}%` }}
+              ></div>
+              <div className="progress-icon-header">🔥</div>
+            </div>
+          </div>
+          
+          {showDropdown && (
+            <div className="user-dropdown">
+              <button onClick={(e) => { e.stopPropagation(); onNavigate('settings'); }}>⚙️ Settings</button>
+              <button onClick={(e) => {
+                e.stopPropagation();
+                if (window.confirm('Logout and return to profile selection?')) {
+                  onLogout();
+                }
+              }}>🚪 Logout</button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="main-container">
         {/* Main Content Area */}
         <div className="content-wrapper">
           <div className="left-content">
@@ -136,123 +195,237 @@ const MainMenu = ({ onNavigate, userLevel = 4, totalScore, userName = 'Yaseer' }
               <p className="tip-text">You can earn stars by finishing lessons!</p>
             </motion.div>
 
-            <motion.img
-              src="/avatars/Gemini_Generated_Image_obuqizobuqizobuq.png"
-              alt="Owl Mascot"
+            <motion.video
               className="owl-mascot"
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.6 }}
-            />
+              autoPlay
+              muted
+              loop
+              playsInline
+            >
+              <source src="/video/penguin-video.mp4" type="video/mp4" />
+              <source src="/video/penguin-video.webm" type="video/webm" />
+            </motion.video>
           </div>
         </div>
       </div>
 
       <style jsx>{`
         .frontal-dashboard {
-          min-height: 100vh;
-          width: 100%;
-          background: linear-gradient(180deg, #BAE6FD 0%, #7DD3FC 50%, #BAE6FD 100%);
+          height: 100vh;
+          width: 100vw;
+          background: linear-gradient(135deg, #A5D8FF 0%, #74C0FC 100%);
           padding: 0;
           margin: 0;
           font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           overflow-x: hidden;
+          position: fixed;
+          top: 0;
+          left: 0;
         }
 
-        .main-container {
-          width: 100%;
-          min-height: 100vh;
-          background: transparent;
-          overflow: hidden;
-          padding-bottom: 40px;
+        .background-video {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          object-fit: cover;
+          z-index: -1;
+          opacity: 0.3;
         }
 
-        /* Header Section */
-        .header-section {
-          background: rgba(255, 255, 255, 0.95);
-          padding: 25px 60px;
+        .top-header {
+          background: rgba(0, 0, 0, 0.2);
+          backdrop-filter: blur(10px);
+          padding: 20px 60px;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-          position: sticky;
-          top: 0;
-          z-index: 100;
+          border-radius: 0 0 30px 30px;
+          margin: 0 auto;
+          max-width: 1400px;
         }
 
-        .branding h1 {
+        .branding {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+        }
+
+        .brand-name {
           font-size: 2.5rem;
           font-weight: 800;
+          color: #0F172A;
           margin: 0;
-          color: #1E293B;
           letter-spacing: -0.5px;
         }
 
-        .branding p {
+        .brand-tagline {
           font-size: 1.1rem;
-          color: #475569;
-          margin: 5px 0 0 0;
+          color: #1E293B;
+          margin: 0;
           font-weight: 500;
         }
 
-        .user-profile {
+        .user-profile-header {
           display: flex;
           align-items: center;
           gap: 15px;
+          position: relative;
+          cursor: pointer;
         }
 
-        .avatar-img {
-          width: 70px;
-          height: 70px;
+        .avatar-img-header {
+          width: 60px;
+          height: 60px;
           border-radius: 50%;
-          border: 4px solid white;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          border: 3px solid white;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
           object-fit: cover;
+          background: white;
         }
 
-        .level-info {
+        .level-info-header {
           display: flex;
           flex-direction: column;
           gap: 8px;
         }
 
-        .level-text {
+        .level-text-header {
           font-size: 1rem;
-          font-weight: 600;
-          color: #1E293B;
+          font-weight: 700;
+          color: #1E3A8A;
         }
 
-        .progress-bar {
-          width: 180px;
-          height: 14px;
-          background: rgba(148, 163, 184, 0.3);
+        .progress-bar-header {
+          width: 150px;
+          height: 12px;
+          background: rgba(255, 255, 255, 0.5);
           border-radius: 20px;
           overflow: visible;
           position: relative;
         }
 
-        .progress-fill {
+        .progress-fill-header {
           height: 100%;
           background: linear-gradient(90deg, #FDB022, #F59E0B);
           border-radius: 20px;
           transition: width 0.4s ease;
         }
 
-        .progress-icon {
+        .progress-icon-header {
           position: absolute;
-          right: -5px;
+          right: -8px;
           top: 50%;
           transform: translateY(-50%);
-          font-size: 1.3rem;
+          font-size: 1.2rem;
         }
 
-        /* Content Wrapper */
+        .user-dropdown {
+          position: absolute;
+          top: 100%;
+          right: 0;
+          background: white;
+          border-radius: 15px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+          padding: 10px;
+          z-index: 1000;
+          min-width: 150px;
+        }
+
+        .user-dropdown button {
+          display: block;
+          width: 100%;
+          padding: 10px 15px;
+          border: none;
+          background: transparent;
+          text-align: left;
+          cursor: pointer;
+          border-radius: 10px;
+          font-size: 0.9rem;
+          color: #1E3A8A;
+        }
+
+        .user-dropdown button:hover {
+          background: #f8f9fa;
+        }
+
+        .header-navbar {
+          display: flex;
+          gap: 8px;
+          align-items: center;
+          flex-wrap: wrap;
+          max-width: 50%;
+        }
+
+        .header-navbar-btn {
+          background: linear-gradient(145deg, #ffffff, #e2e8f0);
+          backdrop-filter: blur(15px);
+          border: none;
+          border-radius: 25px;
+          padding: 15px 25px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), 
+                      inset 0 2px 0 rgba(255, 255, 255, 1),
+                      inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+          border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .header-navbar-btn:hover {
+          background: linear-gradient(145deg, #ffffff, #f1f5f9);
+          transform: translateY(-5px);
+          box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25), 
+                      inset 0 3px 0 rgba(255, 255, 255, 1),
+                      inset 0 -3px 0 rgba(0, 0, 0, 0.15);
+        }
+
+        .header-navbar-btn:active {
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3), 
+                      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+                      inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar-icon {
+          font-size: 1.6rem;
+          background: linear-gradient(145deg, #ffffff, #e2e8f0);
+          width: 45px;
+          height: 45px;
+          border-radius: 15px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15), 
+                      inset 0 2px 0 rgba(255, 255, 255, 1),
+                      inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+          border: 2px solid rgba(255, 255, 255, 0.9);
+        }
+
+        .navbar-label {
+          font-size: 1rem;
+          font-weight: 700;
+          color: #1E3A8A;
+          text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+        }
+
+        .main-container {
+          width: 100%;
+          min-height: calc(100vh - 120px);
+          padding: 0;
+        }
+
         .content-wrapper {
           display: flex;
           gap: 30px;
+          width: 100%;
           padding: 40px 60px;
-          max-width: 1600px;
-          margin: 0 auto;
         }
 
         .left-content {
@@ -260,41 +433,24 @@ const MainMenu = ({ onNavigate, userLevel = 4, totalScore, userName = 'Yaseer' }
         }
 
         .right-content {
-          width: 280px;
+          width: 300px;
           display: flex;
           flex-direction: column;
           align-items: center;
           gap: 20px;
         }
 
-        /* Welcome Section */
         .welcome-section {
-          background: linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%);
+          background: rgba(255, 255, 255, 0.25);
+          backdrop-filter: blur(30px);
+          border: 2px solid rgba(255, 255, 255, 0.5);
           border-radius: 30px;
           padding: 40px 50px;
           display: flex;
           justify-content: space-between;
           align-items: center;
           margin-bottom: 30px;
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-          position: relative;
-          overflow: hidden;
-        }
-
-        .welcome-section::before {
-          content: '';
-          position: absolute;
-          top: -50%;
-          right: -10%;
-          width: 300px;
-          height: 300px;
-          background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
-          border-radius: 50%;
-        }
-
-        .welcome-text {
-          position: relative;
-          z-index: 1;
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), inset 0 2px 0 rgba(255, 255, 255, 0.6);
         }
 
         .welcome-text h2 {
@@ -334,12 +490,9 @@ const MainMenu = ({ onNavigate, userLevel = 4, totalScore, userName = 'Yaseer' }
           width: 280px;
           height: 280px;
           object-fit: contain;
-          position: relative;
-          z-index: 2;
           filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
         }
 
-        /* Navigation Buttons */
         .navigation-buttons {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
@@ -348,7 +501,8 @@ const MainMenu = ({ onNavigate, userLevel = 4, totalScore, userName = 'Yaseer' }
         }
 
         .nav-button {
-          background: rgba(147, 197, 253, 0.3);
+          background: rgba(255, 255, 255, 0.5);
+          backdrop-filter: blur(10px);
           border: none;
           border-radius: 20px;
           padding: 20px;
@@ -362,6 +516,7 @@ const MainMenu = ({ onNavigate, userLevel = 4, totalScore, userName = 'Yaseer' }
 
         .nav-button:hover {
           box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+          background: rgba(255, 255, 255, 0.7);
         }
 
         .nav-icon {
@@ -382,13 +537,12 @@ const MainMenu = ({ onNavigate, userLevel = 4, totalScore, userName = 'Yaseer' }
           color: #1E293B;
         }
 
-        /* Modules Section */
         .modules-section {
           margin-top: 20px;
         }
 
         .modules-section h2 {
-          color: #1E293B;
+          color: #1E3A8A;
           font-size: 2rem;
           font-weight: 700;
           margin-bottom: 25px;
@@ -439,7 +593,6 @@ const MainMenu = ({ onNavigate, userLevel = 4, totalScore, userName = 'Yaseer' }
           text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        /* Tip Card */
         .tip-card {
           background: white;
           border-radius: 25px;
@@ -479,7 +632,6 @@ const MainMenu = ({ onNavigate, userLevel = 4, totalScore, userName = 'Yaseer' }
           filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1));
         }
 
-        /* Responsive Design */
         @media (max-width: 1200px) {
           .content-wrapper {
             flex-direction: column;
@@ -498,11 +650,32 @@ const MainMenu = ({ onNavigate, userLevel = 4, totalScore, userName = 'Yaseer' }
         }
 
         @media (max-width: 768px) {
-          .header-section {
+          .top-header {
+            padding: 15px 20px;
             flex-direction: column;
-            gap: 20px;
-            text-align: center;
-            padding: 20px 30px;
+            gap: 15px;
+          }
+
+          .header-navbar {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+          }
+
+          .header-navbar-btn {
+            padding: 6px 12px;
+          }
+
+          .navbar-label {
+            font-size: 0.8rem;
+          }
+
+          .brand-name {
+            font-size: 2rem;
+          }
+
+          .brand-tagline {
+            font-size: 0.9rem;
           }
 
           .content-wrapper {

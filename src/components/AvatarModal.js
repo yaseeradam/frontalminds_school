@@ -1,10 +1,17 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const AvatarModal = ({ isOpen, onClose, avatar, userLevel }) => {
+const AvatarModal = ({ isOpen, onClose, avatar, userLevel, onSelect }) => {
   if (!avatar) return null;
 
   const isUnlocked = userLevel >= avatar.unlockLevel;
+
+  const handleSelect = () => {
+    if (isUnlocked && onSelect) {
+      onSelect(avatar);
+      onClose();
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -121,28 +128,54 @@ const AvatarModal = ({ isOpen, onClose, avatar, userLevel }) => {
               {isUnlocked ? '✓ Unlocked' : '🔒 Locked'}
             </motion.div>
 
-            {/* Close button */}
-            <motion.button
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              onClick={onClose}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              style={{
-                padding: '12px 35px',
-                borderRadius: '12px',
-                border: 'none',
-                background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                color: 'white',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                fontSize: '1.1rem',
-                boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
-              }}
-            >
-              Close
-            </motion.button>
+            {/* Action buttons */}
+            <div style={{ display: 'flex', gap: '15px', justifyContent: 'center' }}>
+              {isUnlocked && onSelect && (
+                <motion.button
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  onClick={handleSelect}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  style={{
+                    padding: '12px 35px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: 'linear-gradient(135deg, #28a745, #20c997)',
+                    color: 'white',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    fontSize: '1.1rem',
+                    boxShadow: '0 4px 15px rgba(40, 167, 69, 0.4)'
+                  }}
+                >
+                  ✓ Select Avatar
+                </motion.button>
+              )}
+              
+              <motion.button
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                onClick={onClose}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                style={{
+                  padding: '12px 35px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '1.1rem',
+                  boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)'
+                }}
+              >
+                Close
+              </motion.button>
+            </div>
 
             {/* Additional info for locked avatars */}
             {!isUnlocked && (
